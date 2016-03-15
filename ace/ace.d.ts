@@ -164,6 +164,12 @@ declare module AceAjax {
         getDocument(): Document;
 
         /**
+         * Experimental: if a character is inserted to the left of this anchor,
+         * it gets inserted within the anchor.
+         */
+        $insertRight: boolean;
+
+        /**
          * Fires whenever the anchor position changes.
          * Both of these objects have a `row` and `column` property corresponding to the position.
          * Events that can trigger this function include [[Anchor.setPosition `setPosition()`]].
