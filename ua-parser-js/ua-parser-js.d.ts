@@ -134,7 +134,7 @@ declare namespace UAParser {
 
 declare module "ua-parser-js" {
 
-    export class UAParser {
+    export default class UAParser {
         static VERSION: string;
         static BROWSER: UAParser.BROWSER;
         static CPU: UAParser.CPU;
