@@ -10,6 +10,11 @@ export as namespace GarminFitSDK;
  * Stream class for handling FIT file data.
  */
 export class Stream {
+    /** Little endian byte order constant */
+    static readonly LITTLE_ENDIAN: boolean;
+    /** Big endian byte order constant */
+    static readonly BIG_ENDIAN: boolean;
+
     static fromByteArray(data: number[]): Stream;
     static fromBuffer(buffer: any): Stream;
     static fromArrayBuffer(arrayBuffer: ArrayBuffer): Stream;
@@ -19,6 +24,9 @@ export class Stream {
     readonly length: number;
     readonly bytesRead: number;
     readonly position: number;
+
+    /** Gets or sets the CRC calculator for the stream */
+    crcCalculator: CrcCalculator | null;
 
     reset(): void;
     seek(position: number): void;
@@ -522,12 +530,84 @@ export class Decoder {
     read(options?: DecoderReadOptions): DecoderReadResult;
 }
 
+export interface FieldDescription {
+    developerDataIdMesg: any;
+    fieldDescriptionMesg: any;
+}
+
+export interface EncoderOptions {
+    /** Field descriptions for developer fields */
+    fieldDescriptions?: Record<number, FieldDescription> | null;
+}
+
+export interface Mesg {
+    mesgNum: number;
+    [key: string]: any;
+}
+
 export class Encoder {
-    // Placeholder for Encoder
+    /**
+     * Creates a FIT File Encoder
+     * @param options - Encoder options (optional)
+     */
+    constructor(options?: EncoderOptions);
+
+    /**
+     * Closes the encoder and returns the file data
+     * @returns A Uint8Array containing the file data
+     */
+    close(): Uint8Array;
+
+    /**
+     * Encodes a message into the file
+     * @param mesg - The message data with mesgNum property
+     * @returns this (for chaining)
+     */
+    writeMesg(mesg: Mesg): this;
+
+    /**
+     * Encodes a message into the file
+     * This method can be used as a Decoder mesgListener callback
+     * @param mesgNum - The message number for this message
+     * @param mesg - The message data
+     * @returns this (for chaining)
+     */
+    onMesg(mesgNum: number, mesg: any): this;
+
+    /**
+     * Adds a Developer Data Field Description and associated Developer Data Id Message to the Encoder
+     * This provides the Encoder with the context required to write Developer Fields to the output-stream
+     * @param key - The field key
+     * @param developerDataIdMesg - The Developer Data Id message
+     * @param fieldDescriptionMesg - The Field Description message
+     * @returns this (for chaining)
+     */
+    addDeveloperField(key: number, developerDataIdMesg: any, fieldDescriptionMesg: any): this;
 }
 
 export class CrcCalculator {
-    // Placeholder for CrcCalculator
+    constructor();
+
+    /** Gets the current CRC value */
+    get crc(): number;
+
+    /**
+     * Adds bytes to the CRC calculation
+     * @param buf - Buffer containing bytes
+     * @param start - Start index
+     * @param end - End index
+     * @returns The updated CRC value
+     */
+    addBytes(buf: Uint8Array, start: number, end: number): number;
+
+    /**
+     * Calculates CRC for a buffer
+     * @param buf - Buffer containing bytes
+     * @param start - Start index
+     * @param end - End index
+     * @returns The calculated CRC value
+     */
+    static calculateCRC(buf: Uint8Array, start: number, end: number): number;
 }
 
 export const Profile: {

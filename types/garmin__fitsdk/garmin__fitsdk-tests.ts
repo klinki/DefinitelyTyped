@@ -10,6 +10,9 @@ import {
     Utils,
     DecoderReadOptions,
     DecoderReadResult,
+    EncoderOptions,
+    FieldDescription,
+    Mesg,
     FileIdMesg,
     FileCreatorMesg,
     ActivityMesg,
@@ -31,6 +34,10 @@ import {
 // Stream Tests
 // ============================================================================
 
+// Test Stream static constants
+const littleEndian: boolean = Stream.LITTLE_ENDIAN;
+const bigEndian: boolean = Stream.BIG_ENDIAN;
+
 // Test Stream constructor
 const arrayBuffer = new ArrayBuffer(100);
 const stream = new Stream(arrayBuffer);
@@ -44,6 +51,10 @@ const streamFromArrayBuffer = Stream.fromArrayBuffer(new ArrayBuffer(50));
 const length: number = stream.length;
 const bytesRead: number = stream.bytesRead;
 const position: number = stream.position;
+
+// Test Stream crcCalculator getter/setter
+const crcCalc: CrcCalculator | null = stream.crcCalculator;
+stream.crcCalculator = new CrcCalculator();
 
 // Test Stream instance methods
 stream.reset();
@@ -274,13 +285,50 @@ const customMesgs = messages.customMessageType;
 // Encoder Tests
 // ============================================================================
 
+// Test Encoder with no options
 const encoder = new Encoder();
+
+// Test Encoder with fieldDescriptions
+const encoderWithFields = new Encoder({
+    fieldDescriptions: {
+        0: {
+            developerDataIdMesg: { developerId: 123 },
+            fieldDescriptionMesg: { fieldName: "custom_field" },
+        },
+    },
+});
+
+// Test writeMesg
+const mesg: Mesg = {
+    mesgNum: 0,
+    timestamp: new Date(),
+    serialNumber: 12345,
+};
+encoder.writeMesg(mesg);
+
+// Test onMesg (can be used as mesgListener callback)
+encoder.onMesg(0, { timestamp: new Date() });
+
+// Test addDeveloperField method
+encoder.addDeveloperField(1, { developerId: 456 }, { fieldName: "another_field" });
+
+// Test close method
+const encodedData: Uint8Array = encoder.close();
 
 // ============================================================================
 // CrcCalculator Tests
 // ============================================================================
 
 const crcCalculator = new CrcCalculator();
+
+// Test crc getter
+const currentCrc: number = crcCalculator.crc;
+
+// Test addBytes method
+const newCrc: number = crcCalculator.addBytes(new Uint8Array([1, 2, 3, 4, 5]), 0, 5);
+
+// Test static calculateCRC method
+const calculatedCrc: number = CrcCalculator.calculateCRC(new Uint8Array([1, 2, 3]), 0, 3);
 
 // ============================================================================
 // Profile Tests
@@ -290,7 +338,7 @@ const crcCalculator = new CrcCalculator();
 const major: number = Profile.version.major;
 const minor: number = Profile.version.minor;
 const patch: number = Profile.version.patch;
-const type: string = Profile.version.type;
+const versionType: string = Profile.version.type;
 
 // Test CommonFields
 const partIndex: number = Profile.CommonFields.PartIndex;
@@ -347,8 +395,11 @@ export {
     stream,
     decoder,
     encoder,
+    encoderWithFields,
     result,
     fileIdMesg,
     sessionMesg,
     recordMesg,
+    encodedData,
+    crcCalculator,
 };
