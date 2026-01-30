@@ -1,0 +1,18 @@
+{
+    "private": true,
+    "type": "module",
+    "name": "@types/garmin__fitsdk",
+    "version": "21.188.9999",
+    "projects": [
+        "https://github.com/garmin/fit-javascript-sdk"
+    ],
+    "devDependencies": {
+        "@types/garmin__fitsdk": "workspace:."
+    },
+    "owners": [
+        {
+            "name": "David Klingenberg",
+            "githubUsername": "klinki"
+        }
+    ]
+}
